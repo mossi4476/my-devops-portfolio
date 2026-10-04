@@ -7,19 +7,13 @@ resource "null_resource" "lambda_zip" {
   triggers = {
     source_dir_hash = local.hash_source_dir
   }
-
-  provisioner "local-exec" {
-    command = <<EOT
-      pip install -r ${var.source_dir}/requirements.txt -t ${var.source_dir}
-      rm -rf ${var.source_dir}/*.dist-info
-    EOT
-  }
 }
 
 resource "aws_lambda_function" "this" {
   depends_on = [
-    null_resource.lambda_zip,
-    aws_cloudwatch_log_group.lambda_log
+    aws_cloudwatch_log_group.lambda_log,
+    aws_iam_role_policy_attachment.vpc_policy,
+    aws_iam_role_policy_attachment.basic_policy
   ]
 
   function_name = local.function_name

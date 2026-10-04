@@ -10,6 +10,7 @@ resource "helm_release" "argocd" {
   chart      = "argo-cd"
   namespace  = kubernetes_namespace.argocd.metadata[0].name
   version    = var.argocd_version
+  timeout    = 600
 
   values = [
     templatefile("${path.module}/helm/argocd-values.yaml", {
@@ -27,6 +28,7 @@ resource "helm_release" "argo_rollouts" {
   chart      = "argo-rollouts"
   namespace  = kubernetes_namespace.argocd.metadata[0].name
   version    = var.argo_rollouts_version
+  timeout    = 600
 
   set = [
     {

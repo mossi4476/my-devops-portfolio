@@ -31,6 +31,7 @@ data "aws_iam_policy_document" "kms_policy" {
       type = "Service"
       identifiers = [
         "logs.amazonaws.com",
+        "logs.${var.aws_region}.amazonaws.com",
         "ec2.amazonaws.com",
         "s3.amazonaws.com"
       ]
@@ -93,6 +94,7 @@ data "aws_iam_policy_document" "kms_policy" {
       type = "Service"
       identifiers = [
         "logs.amazonaws.com",
+        "logs.${var.aws_region}.amazonaws.com",
         "codecommit.amazonaws.com",
         "codebuild.amazonaws.com",
         "codepipeline.amazonaws.com",

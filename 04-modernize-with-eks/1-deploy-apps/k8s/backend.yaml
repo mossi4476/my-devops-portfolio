@@ -24,7 +24,7 @@ spec:
       serviceAccountName: backend
       containers:
         - name: backend
-          image: 339712808680.dkr.ecr.ap-southeast-1.amazonaws.com/backend:v1
+          image: 106403001296.dkr.ecr.us-east-1.amazonaws.com/backend:v1
           ports:
             - containerPort: 5000
           resources:

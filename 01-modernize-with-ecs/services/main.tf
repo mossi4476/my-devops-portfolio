@@ -132,7 +132,7 @@ module "base_service" {
 
   cpu    = var.cpu
   memory = var.memory
-  port   = 5000
+  port   = 80
 
   path_pattern = "/*"
 

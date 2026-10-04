@@ -16,7 +16,10 @@ variable "application" {
   default = "devops-blueprint-app"
 }
 
-variable "service_domain" {}
+# leave empty ("") to run HTTP-only via the ALB DNS name, no Route53 hosted zone / ACM needed
+variable "service_domain" {
+  default = ""
+}
 
 variable "retention_days" {
   default = 90

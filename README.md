@@ -33,6 +33,33 @@ Real-world AWS infrastructure projects from my experience as a Cloud/DevOps/SRE 
 
 ---
 
+## 🚀 Live Deployment Guide & Secrets Cheat Sheet
+
+Toàn bộ hướng dẫn chi tiết, tài khoản, mật khẩu, và quy trình vận hành cho **Project 01 đến Project 04** đã được tổng hợp đầy đủ tại:
+👉 **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)**
+
+### Bảng Tra Cứu Nhanh (Quick Secrets & Endpoints)
+
+| Dự án / Dịch vụ | Thông số / Khóa | Giá trị |
+| :--- | :--- | :--- |
+| **AWS Account ID** | ID | `106403001296` |
+| **Project 01 (ECS ALB)** | Public App URL | [http://devops-blueprint-alb-30108751.us-east-1.elb.amazonaws.com](http://devops-blueprint-alb-30108751.us-east-1.elb.amazonaws.com) |
+| **Project 02 (SSM Spokes)**| Spoke 1 & 2 Instances | `i-016b84424f65276e6`, `i-04883a4aae975e0ac` |
+| **Project 03 (Central Egress)**| Lambdas in `us-east-2` | `app1`, `app2` (kiểm tra request GitHub API qua TGW) |
+| **Project 04 (EKS ALB)** | Web App URL | [http://k8s-frontend-frontend-5438bb57ec-889534872.us-east-1.elb.amazonaws.com](http://k8s-frontend-frontend-5438bb57ec-889534872.us-east-1.elb.amazonaws.com) |
+| **Project 04 (EKS API)** | REST API Items | [http://k8s-frontend-frontend-5438bb57ec-889534872.us-east-1.elb.amazonaws.com/api/items](http://k8s-frontend-frontend-5438bb57ec-889534872.us-east-1.elb.amazonaws.com/api/items) |
+| **PostgreSQL 17 (RDS)** | Host | `devops-blueprint-eks-postgres.ci10yg06m8tj.us-east-1.rds.amazonaws.com` |
+| **PostgreSQL 17 (RDS)** | User / Pass / DB | `dbadmin` / `Y_dd9943n>)o6oN3` / `appdb` |
+| **CodeCommit Git HTTPS** | Username / Password | `dungnt-at-106403001296` / `1eZumD20jpiaO7D7lGSdwBaURqvAyZioSIMpsNpp7gY8lzKpv5liVySxmhE=` |
+| **CodeCommit SSH Key** | SSH Key ID / Private Key | `APKARRRQ46PIDQBSW4YZ` / `~/.ssh/argocd-codecommit` |
+| **ArgoCD UI** | Port-forward / User / Pass | `kubectl port-forward svc/argocd-server -n argocd 8080:80` → `admin` / `3Y8jbIvR5k3Tjcgf` |
+| **Argo Rollouts UI** | Port-forward | `kubectl port-forward svc/argo-rollouts-dashboard -n argocd 3100:3100` |
+| **Grafana UI** | Port-forward / User / Pass | `kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80` → `admin` / `admin12345` |
+| **Prometheus UI** | Port-forward | `kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-prometheus 9090:9090` |
+| **Alertmanager UI** | Port-forward | `kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-alertmanager 9093:9093` |
+
+---
+
 ## 01 - Modernize with ECS
 
 ![ECS Architecture](./images/ecs-cloudmap.drawio.svg "ECS Cluster Architecture")

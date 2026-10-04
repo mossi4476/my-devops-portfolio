@@ -34,6 +34,11 @@ output "kms_key_arn" {
   value = var.kms_arn
 }
 
+# consumed by 01-modernize-with-ecs (locals.tf) and modules/ecs-cicd-ghapps
+output "kms_key_id" {
+  value = var.kms_arn
+}
+
 output "vpc_cidr_block" {
   value = var.vpc_cidr_block
 }

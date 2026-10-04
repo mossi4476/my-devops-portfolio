@@ -11,9 +11,9 @@ data "aws_iam_policy_document" "assume_role_policy" {
   }
 }
 
-data "external" "folder_hash" {
-  program = ["bash", "${path.module}/check-hash.sh", var.source_dir]
-}
+# data "external" "folder_hash" {
+#   program = ["bash", "${path.module}/check-hash.sh", var.source_dir]
+# }
 
 data "archive_file" "lambda_src" {
   depends_on = [null_resource.lambda_zip]

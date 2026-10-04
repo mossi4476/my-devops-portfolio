@@ -10,6 +10,6 @@ spec:
     - namePattern: frontend
       images:
         - alias: frontend
-          imageName: 339712808680.dkr.ecr.ap-southeast-1.amazonaws.com/frontend
+          imageName: 106403001296.dkr.ecr.us-east-1.amazonaws.com/frontend
           commonUpdateSettings:
             updateStrategy: newest-build

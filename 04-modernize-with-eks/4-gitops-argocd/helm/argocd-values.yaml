@@ -13,3 +13,9 @@ repoServer:
   env:
     - name: AWS_REGION
       value: ${region}
+
+dex:
+  enabled: false
+
+notifications:
+  enabled: false

@@ -71,7 +71,7 @@ resource "aws_instance" "from_spoke1" {
 
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
 
-  security_groups = [
+  vpc_security_group_ids = [
     aws_security_group.spoke1_ec2_sg.id
   ]
 
@@ -87,7 +87,7 @@ resource "aws_instance" "from_spoke2" {
   subnet_id = module.vpc_spoke2.private_subnet_ids[0]
 
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
-  security_groups = [
+  vpc_security_group_ids = [
     aws_security_group.spoke2_ec2_sg.id
   ]
 

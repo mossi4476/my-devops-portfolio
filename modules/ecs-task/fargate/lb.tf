@@ -8,7 +8,7 @@ resource "aws_lb_target_group" "service_tg" {
 
   health_check {
     interval = 7
-    path     = "/health"
+    path     = "/"
     port     = var.port
     timeout  = 5
   }

@@ -80,7 +80,7 @@ resource "aws_ecs_task_definition" "task_def" {
       "healthCheck" : {
         "command" : [
           "CMD-SHELL",
-          "curl -f http://localhost:${var.port}/health || exit 1"
+          "curl -f http://localhost:${var.port}/ || wget -q --spider http://localhost:${var.port}/ || exit 1"
         ],
         "interval" : 30,
         "retries" : 3,

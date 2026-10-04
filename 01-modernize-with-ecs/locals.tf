@@ -48,6 +48,9 @@ data "template_file" "user_data" {
 locals {
   network_info = data.terraform_remote_state.network.outputs
 
+  # HTTPS (ACM + Route53) only when a domain is provided
+  use_https = var.service_domain != ""
+
   kms_key_id  = local.network_info.kms_key_id
   kms_key_arn = local.network_info.kms_key_arn
   vpc_id      = local.network_info.vpc_id

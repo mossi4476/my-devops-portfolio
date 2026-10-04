@@ -31,7 +31,12 @@ output "http_listener_arn" {
 }
 
 output "https_listener_arn" {
-  value = aws_lb_listener.ecs_listener_443.arn
+  # HTTP-only mode: fall back to the port 80 listener (consumed by services/main.tf)
+  value = local.use_https ? aws_lb_listener.ecs_listener_443[0].arn : aws_lb_listener.ecs_listener.arn
+}
+
+output "app_url" {
+  value = local.use_https ? "https://myapp.${var.service_domain}" : "http://${aws_lb.cluster.dns_name}"
 }
 
 output "ecs_svc_linked_role_name" {

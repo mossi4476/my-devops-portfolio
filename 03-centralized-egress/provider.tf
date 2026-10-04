@@ -1,4 +1,6 @@
 terraform {
+  backend "s3" {}
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -9,7 +11,8 @@ terraform {
 }
 
 provider "aws" {
-  region = var.region
+  region  = var.region
+  profile = var.profile
 
   default_tags {
     tags = local.tags

@@ -92,13 +92,30 @@ resource "aws_lb_listener" "ecs_listener" {
   port     = "80"
   protocol = "HTTP"
 
-  default_action {
-    type = "redirect"
+  # HTTPS mode: redirect 80 -> 443
+  dynamic "default_action" {
+    for_each = local.use_https ? [1] : []
+    content {
+      type = "redirect"
 
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
+      redirect {
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
+    }
+  }
+
+  # HTTP-only mode: this listener receives the service rules
+  dynamic "default_action" {
+    for_each = local.use_https ? [] : [1]
+    content {
+      type = "fixed-response"
+      fixed_response {
+        content_type = "application/json"
+        message_body = "{\"message\": \"Not Found!!\"}"
+        status_code  = "404"
+      }
     }
   }
 
@@ -108,13 +125,15 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 resource "aws_lb_listener" "ecs_listener_443" {
+  count = local.use_https ? 1 : 0
+
   load_balancer_arn = aws_lb.cluster.arn
 
   port     = "443"
   protocol = "HTTPS"
 
   ssl_policy      = "ELBSecurityPolicy-2016-08"
-  certificate_arn = aws_acm_certificate.acm.arn
+  certificate_arn = aws_acm_certificate.acm[0].arn
 
   default_action {
     order = 1
@@ -132,7 +151,9 @@ resource "aws_lb_listener" "ecs_listener_443" {
 }
 
 resource "aws_route53_record" "alb_record" {
-  zone_id = data.aws_route53_zone.selected.zone_id
+  count = local.use_https ? 1 : 0
+
+  zone_id = data.aws_route53_zone.selected[0].zone_id
 
   name = "myapp.${var.service_domain}"
   type = "A"

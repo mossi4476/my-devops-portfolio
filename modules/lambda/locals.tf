@@ -5,5 +5,5 @@ locals {
   subnet_ids         = var.subnet_ids
   security_group_ids = var.security_group_ids
 
-  hash_source_dir = data.external.folder_hash.result.hash
+  hash_source_dir = sha256(join("", [for f in fileset(var.source_dir, "*") : filesha256("${var.source_dir}/${f}")]))
 }

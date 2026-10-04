@@ -22,9 +22,9 @@ resource "aws_security_group" "app1_sg" {
   }
 
   egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -45,9 +45,9 @@ resource "aws_security_group" "app2_sg" {
   }
 
   egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -61,6 +61,7 @@ resource "aws_security_group" "app2_sg" {
 module "app1" {
   source      = "../modules/lambda"
   lambda_name = "app1"
+  region      = var.region
 
   runtime     = "python3.9"
   timeout     = 20
@@ -83,6 +84,7 @@ module "app1" {
 module "app2" {
   source      = "../modules/lambda"
   lambda_name = "app2"
+  region      = var.region
 
   runtime     = "python3.9"
   timeout     = 20
