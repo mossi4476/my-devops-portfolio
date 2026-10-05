@@ -39,10 +39,15 @@ cd 01-modernize-with-ecs
 terraform init -backend-config=backend.config
 terraform apply -auto-approve
 ```
-**Kiểm tra dịch vụ:**
+**Kiểm tra dịch vụ & phân giải DNS nội bộ (Cloud Map):**
 ```bash
+# 1. Kiểm tra Web App qua ALB:
 curl -i http://devops-blueprint-alb-30108751.us-east-1.elb.amazonaws.com
-# Kỳ vọng phản hồi: HTTP 200 OK
+# Kỳ vọng: HTTP 200 OK
+
+# 2. Kiểm tra phân giải Service Discovery nội bộ qua Cloud Map (chạy từ bên trong container hoặc VPC):
+nslookup backend.devops-blueprint.local
+# Kỳ vọng: Trả về Private IP của các ECS backend task đang chạy
 ```
 
 ---
@@ -59,11 +64,25 @@ curl -i http://devops-blueprint-alb-30108751.us-east-1.elb.amazonaws.com
 - **Spoke 2 EC2 Instance:** `spoke2-ec2` (`i-04883a4aae975e0ac`) - Private Subnet, không Public IP.
 - **IAM Role cho EC2:** `ec2-role` (Gắn `AmazonSSMManagedInstanceCore`, `AmazonS3FullAccess`).
 
-### 2.2. Hướng dẫn kiểm tra kết nối SSM Session Manager
-Kiểm tra kết nối vào máy chủ Spoke mà không cần Internet hay Bastion Host:
+### 2.2. Hướng dẫn kiểm tra kết nối & Phân giải DNS (nslookup)
+**Bước 1: Kết nối vào Spoke EC2 không cần Internet qua SSM Session Manager:**
 ```bash
-aws ssm start-session --target i-016b84424f65276e6 --region us-east-1
-aws ssm start-session --target i-04883a4aae975e0ac --region us-east-1
+aws ssm start-session --target i-016b84424f65276e6 --region us-east-1   # Spoke 1
+aws ssm start-session --target i-04883a4aae975e0ac --region us-east-1   # Spoke 2
+```
+
+**Bước 2: Chạy lệnh `nslookup` bên trong Spoke EC2 để kiểm tra nhận 2 IP của VPC Endpoint tập trung:**
+```bash
+nslookup ssm.us-east-1.amazonaws.com
+nslookup s3.us-east-1.amazonaws.com
+```
+> **Giải thích kết quả:**
+> Lệnh `nslookup` sẽ trả về **2 Private IP** (tương ứng với 2 Availability Zones đặt VPC Interface Endpoint trong Hub VPC).
+> Điều này xác nhận rằng Route 53 Private Hosted Zone đang hoạt động chính xác, cho phép máy chủ Spoke phân giải và gửi lưu lượng tới Hub VPC qua Transit Gateway một cách riêng tư hoàn toàn mà không cần Internet.
+
+**Bước 3: Lệnh kiểm tra nhanh Private IP của cả 2 Spoke từ máy tính cá nhân:**
+```bash
+aws ec2 describe-instances --filters "Name=tag:Name,Values=spoke*" --query "Reservations[].Instances[].[Tags[?Key=='Name'].Value|[0], PrivateIpAddress]" --output table
 ```
 
 ---

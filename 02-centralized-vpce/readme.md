@@ -40,4 +40,20 @@ $ terraform apply -var-file=terraform.tfvars -auto-approve # use .tfvars if any
 
 ## Testing
 
-Try to connect in both EC2 instances using session manager
+1. Connect to both EC2 instances using AWS Systems Manager (Session Manager):
+```bash
+aws ssm start-session --target <SPOKE1_INSTANCE_ID> --region us-east-1
+aws ssm start-session --target <SPOKE2_INSTANCE_ID> --region us-east-1
+```
+
+2. Inside the Spoke EC2 instance, test DNS resolution of centralized VPC endpoints:
+```bash
+nslookup ssm.us-east-1.amazonaws.com
+nslookup s3.us-east-1.amazonaws.com
+```
+*Expected Output:* The command returns **2 Private IP addresses** belonging to the VPC Interface Endpoints located in the Hub VPC (one per AZ). This verifies that the Spoke VPC resolves the endpoints via Route 53 Private Hosted Zone across Transit Gateway without internet exposure.
+
+3. Verify instances private IPs from your local machine:
+```bash
+aws ec2 describe-instances --filters "Name=tag:Name,Values=spoke*" --query "Reservations[].Instances[].[Tags[?Key=='Name'].Value|[0], PrivateIpAddress]" --output table
+```

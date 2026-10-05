@@ -80,6 +80,15 @@ ECS cluster with a full blue/green deployment pipeline using AWS native tooling.
 - WAF attached to the load balancer
 - Route 53 + ACM for HTTPS termination
 
+**Testing & Verification:**
+```bash
+# 1. Test Web App via ALB:
+curl -i http://devops-blueprint-alb-30108751.us-east-1.elb.amazonaws.com
+
+# 2. Test Cloud Map Service Discovery inside ECS/VPC:
+nslookup backend.devops-blueprint.local
+```
+
 → [01-modernize-with-ecs/](./01-modernize-with-ecs/)
 
 ---
@@ -95,6 +104,21 @@ All AWS service VPC endpoints live in a single hub VPC. Spoke VPCs resolve them 
 **Design constraints:**
 - Endpoint resource policies are capped at 20,480 characters — plan carefully when many VPCs share endpoints
 - Endpoint ENIs auto-scale under traffic spikes — allocate enough IP space in the hub VPC
+
+**Testing & Verification (DNS & VPC Endpoints):**
+```bash
+# 1. Check Private IPs of both Spoke EC2 instances:
+aws ec2 describe-instances --filters "Name=tag:Name,Values=spoke*" --query "Reservations[].Instances[].[Tags[?Key=='Name'].Value|[0], PrivateIpAddress]" --output table
+
+# 2. Connect to Spoke instances via AWS SSM Session Manager:
+aws ssm start-session --target i-016b84424f65276e6 --region us-east-1   # Spoke 1
+aws ssm start-session --target i-04883a4aae975e0ac --region us-east-1   # Spoke 2
+
+# 3. Inside the Spoke EC2 instance, run nslookup:
+nslookup ssm.us-east-1.amazonaws.com
+nslookup s3.us-east-1.amazonaws.com
+# Expected output: Returns 2 Private IPs belonging to the VPC Interface Endpoints in the Hub VPC (one per AZ).
+```
 
 → [02-centralized-vpce/](./02-centralized-vpce/)
 

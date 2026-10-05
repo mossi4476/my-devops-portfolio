@@ -99,20 +99,16 @@ $ terraform apply -auto-approve -var-file=terraform.tfvars
 
 ## Testing
 
-- Access the base service
+- Access the deployed base service via ALB:
 
 ```bash
-$ curl https://example.com
+$ curl -i http://devops-blueprint-alb-30108751.us-east-1.elb.amazonaws.com
 ```
 
-- Access the service 1
+- Verify internal DNS resolution & Service Discovery (AWS Cloud Map) inside ECS container / VPC:
 
 ```bash
-$ curl https://example.com/service-1
+$ nslookup backend.devops-blueprint.local
+# Expected: Resolves to the private IP addresses of the running backend ECS tasks
 ```
 
-- Access the service 2
-
-```bash
-$ curl https://example.com/service-2
-```
