@@ -1,0 +1,101 @@
+name: app-ops-demo
+
+# Lab Unit 3 (health-check) + Unit 4 (approved restart & BEFORE/AFTER logs)
+# App đang chạy:  postgres + backend (Flask, ../apps/backend)
+# Công cụ vận hành (profile "tools", chạy bằng `docker compose run --rm ...`):
+#   healthcheck  -> scripts/healthcheck.sh
+#   restart      -> scripts/approved-restart.sh
+#   simulate     -> scripts/simulate.sh
+
+x-tool: &tool
+  build: ./toolbox
+  image: app-ops-toolbox:latest
+  profiles: ["tools"]
+  pid: host                      # thấy process của các container khác (check PROCESS)
+  depends_on: [backend]
+  volumes:
+    - ./scripts:/opt/hc:ro
+    - ./approvals:/approvals:ro
+    - ./evidence:/evidence
+    - pgdata:/pgdata:ro          # đo % disk của data directory
+    - /var/run/docker.sock:/var/run/docker.sock
+  environment: &tool-env
+    TZ: Asia/Ho_Chi_Minh
+    # ---- health-check targets ----
+    SERVICES: "docker:hc-backend docker:hc-postgres"
+    PROCESSES: "python app.py,postgres -c max_connections"
+    URLS: >-
+      http://backend:5000/health|200|healthy
+      http://backend:5000/health/ready|200|ready
+      http://backend:5000/api/items|200|Sample
+    PORTS: "backend:5000 postgres:5432"
+    URL_SLOW_MS: "800"
+    # ---- database ----
+    PGHOST: postgres
+    PGPORT: "5432"
+    PGUSER: app
+    PGPASSWORD: app123
+    PGDATABASE: appdb
+    DB_SESSION_WARN_PCT: "70"
+    DB_SESSION_CRIT_PCT: "90"
+    DB_LONG_QUERY_SEC: "30"
+    DB_IDLE_TX_SEC: "30"
+    TS_SIZE_WARN_MB: "150"       # ngưỡng thấp để demo được bằng simulate.sh bloat
+    TS_SIZE_CRIT_MB: "300"
+    DISK_PATH: /pgdata
+    # ---- restart ----
+    WAIT_URL: http://backend:5000/health/ready
+    WAIT_TIMEOUT: "120"
+
+services:
+  postgres:
+    image: public.ecr.aws/docker/library/postgres:16
+    container_name: hc-postgres
+    command: ["postgres", "-c", "max_connections=30"]   # nhỏ để demo ngưỡng session
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app123
+      POSTGRES_DB: appdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../apps/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d appdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ../apps/backend
+    container_name: hc-backend
+    environment:
+      DB_HOST: postgres
+      DB_NAME: appdb
+      DB_USER: app
+      DB_PASSWORD: app123
+    ports: ["5000:5000"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:5000/health/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  healthcheck:
+    <<: *tool
+    entrypoint: ["bash", "/opt/hc/healthcheck.sh"]
+
+  restart:
+    <<: *tool
+    entrypoint: ["bash", "/opt/hc/approved-restart.sh"]
+
+  simulate:
+    <<: *tool
+    entrypoint: ["bash", "/opt/hc/simulate.sh"]
+
+volumes:
+  pgdata:

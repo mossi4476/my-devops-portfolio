@@ -1,0 +1,3 @@
+# Bash scripts phải giữ LF, nếu bị CRLF sẽ lỗi "$'\r': command not found" trong container
+*.sh  text eol=lf
+*.env text eol=lf
